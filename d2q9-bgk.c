@@ -427,7 +427,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
   tot_u = 0.f;
 
   /* loop over all non-blocked cells */
-#pragma omp parallel for  nowait
+#pragma omp parallel for  collapse(2)
   for (int jj = 0; jj < params.ny; jj++)
   {
 
@@ -588,7 +588,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
-#pragma omp parallel for  nowait
+#pragma omp parallel for collapse(2)
   for (int jj = 0; jj < params->ny; jj++) {
 
     for (int ii = 0; ii < params->nx; ii++) {
