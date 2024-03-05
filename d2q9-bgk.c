@@ -221,7 +221,7 @@ int accelerate_flow(const t_param params, t_speed* restrict cells, int* restrict
   __assume_aligned(cells->speed_7, 64);
   __assume_aligned(cells->speed_8, 64);
   __assume((params.nx)%64==0);
-#pragma omp parallel for
+#pragma omp simd
   for (int ii = 0; ii < params.nx; ii++) {
 
     if (!obstacles[ii + jj*params.nx]
