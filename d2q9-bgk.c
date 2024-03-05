@@ -253,7 +253,7 @@ float collision(const t_param params, t_speed*  restrict cells, t_speed*  restri
 
   /* loop over the cells in the grid */
   __assume((params.ny)%64==0);
-#pragma omp parallel for reduction(+:tot_u), reduction(+:tot_cells)
+#pragma omp parallel for reduction(+:tot_u), reduction(+:tot_cells), nowait
   for (int jj = 0; jj < params.ny; jj++) {
     __assume_aligned(cells->speed_0, 64);
     __assume_aligned(cells->speed_1, 64);
@@ -427,7 +427,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
   tot_u = 0.f;
 
   /* loop over all non-blocked cells */
-#pragma omp parallel for
+#pragma omp parallel for collapse(2) nowait
   for (int jj = 0; jj < params.ny; jj++)
   {
 
@@ -588,7 +588,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   float w1 = params->density      / 9.f;
   float w2 = params->density      / 36.f;
 
-#pragma omp parallel for
+#pragma omp parallel for collapse(2) nowait
   for (int jj = 0; jj < params->ny; jj++) {
 
     for (int ii = 0; ii < params->nx; ii++) {
