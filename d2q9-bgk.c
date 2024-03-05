@@ -221,7 +221,7 @@ int accelerate_flow(const t_param params, t_speed* restrict cells, int* restrict
   __assume_aligned(cells->speed_7, 64);
   __assume_aligned(cells->speed_8, 64);
   __assume((params.nx)%64==0);
-#pragma omp parallel for simd
+#pragma omp parallel for
   for (int ii = 0; ii < params.nx; ii++) {
 
     if (!obstacles[ii + jj*params.nx]
@@ -430,7 +430,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles)
 #pragma omp parallel for
   for (int jj = 0; jj < params.ny; jj++)
   {
-#pragma omp simd
+
     for (int ii = 0; ii < params.nx; ii++)
     {
       /* ignore occupied cells */
@@ -590,7 +590,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
 
 #pragma omp parallel for
   for (int jj = 0; jj < params->ny; jj++) {
-#pragma omp simd
+
     for (int ii = 0; ii < params->nx; ii++) {
       /* centre */
       (*cells_ptr)->speed_0[ii + jj*params->nx] = w0;
