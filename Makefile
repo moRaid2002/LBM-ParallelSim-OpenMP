@@ -2,6 +2,7 @@
 
 EXE=d2q9-bgk
 
+
 CC=icc
 CFLAGS= -std=c99 -Wall -Ofast -xHost -restrict -ansi-alias -qopenmp -qopt-report=2
 LIBS = -lm
@@ -10,6 +11,10 @@ FINAL_STATE_FILE=./final_state.dat
 AV_VELS_FILE=./av_vels.dat
 REF_FINAL_STATE_FILE=check/128x128.final_state.dat
 REF_AV_VELS_FILE=check/128x128.av_vels.dat
+
+# Export OpenMP environment variables
+export OMP_PLACES=cores
+export OMP_PROC_BIND=true
 
 all: $(EXE)
 
