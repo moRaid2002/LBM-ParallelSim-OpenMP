@@ -248,10 +248,10 @@ float collision(const t_param params, t_speed*  restrict cells, t_speed*  restri
   const float w0   = 4.f / 9.f;  /* weighting factor */
   const float w1   = 1.f / 9.f;  /* weighting factor */
   const float w2   = 1.f / 36.f; /* weighting factor */
-  int   tot_cells  = 0;   /* no. of cells used in calculation */
-  float tot_u      = 0.f; /* accumulated magnitudes of velocity for each cell */
+  int   tot_cells  = 0;
+  float tot_u      = 0.f;
 
-  /* loop over the cells in the grid */
+
   __assume((params.ny)%64==0);
 #pragma omp parallel for reduction(+:tot_u), reduction(+:tot_cells)
   for (int jj = 0; jj < params.ny; jj++) {
@@ -276,35 +276,27 @@ float collision(const t_param params, t_speed*  restrict cells, t_speed*  restri
     __assume((params.nx)%64==0);
 #pragma omp simd
     for (int ii = 0; ii < params.nx; ii++) {
-      // PROPAGATION STEP:
-      /* determine indices of axis-direction neighbours
-      ** respecting periodic boundary conditions (wrap around) */
+
       const int y_n = (jj + 1) % params.ny;
       const int x_e = (ii + 1) % params.nx;
       const int y_s = (jj == 0) ? (jj + params.ny - 1) : (jj - 1);
       const int x_w = (ii == 0) ? (ii + params.nx - 1) : (ii - 1);
 
-      /* propagate densities from neighbouring cells, following
-      ** appropriate directions of travel and writing into
-      ** scratch space grid */
-      const float s0 = cells->speed_0[ii + jj*params.nx]; /* central cell, no movement */
-      const float s1 = cells->speed_1[x_w + jj*params.nx]; /* east */
-      const float s2 = cells->speed_2[ii + y_s*params.nx]; /* north */
-      const float s3 = cells->speed_3[x_e + jj*params.nx]; /* west */
-      const float s4 = cells->speed_4[ii + y_n*params.nx]; /* south */
-      const float s5 = cells->speed_5[x_w + y_s*params.nx]; /* north-east */
-      const float s6 = cells->speed_6[x_e + y_s*params.nx]; /* north-west */
-      const float s7 = cells->speed_7[x_e + y_n*params.nx]; /* south-west */
-      const float s8 = cells->speed_8[x_w + y_n*params.nx]; /* south-east */
 
-      // COLLISION STEP:
-      /* compute local density total */
+      const float s0 = cells->speed_0[ii + jj*params.nx];
+      const float s1 = cells->speed_1[x_w + jj*params.nx];
+      const float s2 = cells->speed_2[ii + y_s*params.nx];
+      const float s3 = cells->speed_3[x_e + jj*params.nx];
+      const float s4 = cells->speed_4[ii + y_n*params.nx];
+      const float s5 = cells->speed_5[x_w + y_s*params.nx];
+      const float s6 = cells->speed_6[x_e + y_s*params.nx];
+      const float s7 = cells->speed_7[x_e + y_n*params.nx];
+      const float s8 = cells->speed_8[x_w + y_n*params.nx];
+
       const float local_density = s0 + s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8;
 
-      /* compute x velocity component */
       const float u_x = (s1 + s5 + s8 - (s3 + s6 + s7)) / local_density;
 
-      /* compute y velocity component */
       const float u_y = (s2 + s5 + s6 - (s4 + s7 + s8)) / local_density;
 
       /* velocity squared */
@@ -353,8 +345,7 @@ float collision(const t_param params, t_speed*  restrict cells, t_speed*  restri
                                          + (u[8] * u[8]) / (2.f * c_sq * c_sq)
                                          - u_sq / (2.f * c_sq));
 
-        /* relaxation step */
-      // Pseudocode expansion, not actual syntactical C code
+
      float t0 ;
       float t1 ;
     float t2 ;
@@ -387,18 +378,17 @@ float collision(const t_param params, t_speed*  restrict cells, t_speed*  restri
       }
 
 
-        // AVERAGE VELOCITIES STEP:
-        /* local density total */
+
         const float local_density_v = t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8;
 
-        /* x-component of velocity */
+
         const float u_x_v = (t1 + t5 + t8 - (t3 + t6 + t7)) / local_density_v;
-        /* compute y velocity component */
+
         const float u_y_v = (t2 + t5 + t6 - (t4 + t7 + t8)) / local_density_v;
 
-        /* accumulate the norm of x- and y- velocity components */
+
         tot_u += (obstacles[jj*params.nx + ii] != 0) ? 0.f : sqrtf((u_x_v * u_x_v) + (u_y_v * u_y_v));
-        /* increase counter of inspected cells */
+
         tot_cells += (obstacles[jj*params.nx + ii] != 0) ? 0 : 1;
 
       tmp_cells->speed_0[ii + jj*params.nx] = t0;
