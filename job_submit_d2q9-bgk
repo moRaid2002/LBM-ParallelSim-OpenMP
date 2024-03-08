@@ -22,19 +22,11 @@ echo `echo $SLURM_JOB_NODELIST | uniq`
 
 #./d2q9-bgk input_128x256.params obstacles_128x256.dat
 #./d2q9-bgk input_256x256.params obstacles_256x256.dat
-#!/bin/bash
+#./d2q9-bgk input_1024x1024.params obstacles_1024x1024.dat
+advixe-cl --collect=survey --project-dir=./advisor_project -- ./d2q9-bgk input_1024x1024.params obstacles_1024x1024.dat
+advixe-cl --collect=tripcounts --flop --project-dir=./advisor_project -- ./d2q9-bgk input_1024x1024.params obstacles_1024x1024.dat
+advixe-cl --report=roofline --project-dir=./advisor_project --report-output=./roofline.html
 
-#!/bin/bash
 
-# Outer loop for OMP_NUM_THREADS from 1 to 28
-for i in {1..28}
-do
-  # Inner loop to repeat the command 3 times for each value of i
-  for j in {1..3}
-  do
-    echo "Running iteration $j for OMP_NUM_THREADS=$i"
-    env OMP_NUM_THREADS=$i ./d2q9-bgk input_1024x1024.params obstacles_1024x1024.dat
-  done
-done
 
 
